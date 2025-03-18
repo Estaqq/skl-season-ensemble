@@ -217,22 +217,27 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     def _select_rows(self, data, window_index):
         start = self._internal_windows[window_index] - self.padding
         end = self._internal_windows[window_index+1] + self.padding
-        selection = data[(data[self._time_column] >= start) & (data[self._time_column] < end)]
+
+        mask = (data[:,self._time_column] >= start) & (data[:,self._time_column] < end)
+        #selection = data[mask, :]
         if self.data_is_periodic:
             if start < self._window_start:
-                selection = pd.concat(selection, data[data[self._time_column] >= self._window_end - (self._window_start - start)])
+                mask1 = (data[:,self._time_column] >= self._window_end - (self._window_start - start))
+                #selection = np.concatenate((selection, data[mask,:]), axis=0)
+                mask = mask | mask1
             if end >= self._window_end:
-                selection = pd.concat(selection, data[data[self._time_column] < self._window_start + (self._window_end - end)])
-        return selection
+                mask2 = (data[:,self._time_column] < self._window_start + (end - self._window_end))
+                # selection = np.concatenate((selection, data[mask,:]), axis=0)
+                mask = mask | mask2
+        return mask
     
     def _fit_base_models(self):
         for i in range(len(self._models)):
             selection = self._select_rows(self.X_, i)
             if(self._time_column):
-                self._models[i].fit(selection.drop(columns=[self._time_column]), self.y_[selection])
+                self._models[i].fit(np.delete(self.X_[selection,:], self._time_column,axis = 1), self.y_[selection])
             else:
-                self._models[i].fit(self.X_[selection], self.y_[selection])
-
+                self._models[i].fit(self.X_[selection,:], self.y_[selection])
     
     def _apply_appropriate_model(self, row):
         window = self._get_window(row[self._time_column])
@@ -242,7 +247,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         if self._time_column:
             row = row.drop(self._time_column, axis=1)
         model = self._models[window]
-        return model.predict(row)[0]
+        row = row.reshape(1, -1)
+        return model.predict(row)
         
 
 
@@ -293,6 +299,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             self._n_windows = self.n_windows
         else:
             self._n_windows = math.ceil((self._window_end - self._window_start) / self.window_size)
+
         self._set_up_windows()
         self._create_models()
         self._fit_base_models()

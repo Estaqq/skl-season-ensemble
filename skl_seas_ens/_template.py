@@ -112,7 +112,7 @@ class TemplateEstimator(BaseEstimator):
 # the MRO works as expected.
 class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     """An classifier, which manages a collection of base estimators of type base_model_class and trains 
-    and calls them depending on the value of the value of the feature of the name passed in time_column_name.
+    and calls them depending on the value of the feature of the name or index passed in time_column.
 
     Parameters 
     ----------
@@ -305,7 +305,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         #   `feature_names_in_`.
         check_X_y(X, y)
         X, y = self._validate_data(X, y)
-        # We need to make sure that we have a classification task
+        self._validate_params()
         check_classification_targets(y)
 
         # classifier should always store the classes seen during `fit`

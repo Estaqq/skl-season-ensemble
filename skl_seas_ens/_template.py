@@ -114,10 +114,31 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     """An classifier, which manages a collection of base estimators of type base_model_class and trains 
     and calls them depending on the value of the value of the feature of the name passed in time_column_name.
 
-    Parameters TODO
+    Parameters 
     ----------
-    demo_param : str, default='demo'
-        A parameter used for demonstation of how to pass and store paramters.
+
+    base_model_class : BaseEstimator, default=LogisticRegression
+        The class of the base model to be used for the classification.
+    base_model_args : dict, default=None
+        Arguments to be passed to the base model class.
+    window_size : int, float, default=None
+        The size of the windows in which the data is split.
+    window_start : int, float, default=None
+        The lower bound for the range for which we expect data. If None, the minimum value occuring in the training data is used.
+    window_end : int, float, default=None
+        The upper bound for the range for which we expect data. If None, the maximum value occuring in the training data is used.
+    n_windows : int, default=10
+        The number of windows in which the data is split. If window_size is set, this parameter is ignored.
+    windows : list, default=None
+        A list of the boundaries of the windows. If set, window_size, window_start and window_end are ignored.
+    padding : int, float, default=105
+        The distance in time units away from some window for which data is still considered for training the classifier for that particular window.
+    time_column : str, int, default=0
+        The index or name of the column in the input data that contains the time information based on which data is assigned to base classifiers.
+    drop_time_column : bool, default=True
+        Whether to drop the time column from the input data before passing it to the base classifiers.
+    data_is_periodic : bool, default=True
+        Whether the data is periodic. If True, data is considered to be periodic and the windows are wrapped around the window_start and window_end values.
 
     Attributes TODO
     ----------
@@ -155,7 +176,6 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         "drop_time_column": [bool, None],
         "data_is_periodic": [bool, None]
     }
-    @_fit_context(prefer_skip_nested_validation=True)
     def __init__(
             self, 
             base_model_class = LogisticRegression,
@@ -170,6 +190,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             drop_time_column = True,
             data_is_periodic = True
             ):
+        super().__init__()
         self.base_model_class = base_model_class
         self.base_model_args = base_model_args
         self.window_size = window_size
@@ -216,11 +237,13 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     
     def _create_models(self):
         if self.base_model_args == None:
-            self.base_model_args = {}
+            self._base_model_args = {}
+        else:
+            self._base_model_args = self.base_model_args
         self._models = []
         assert len(self._internal_windows) > 1
         for i in range( len(self._internal_windows) -1 ):
-            self._models.append(self.base_model_class(**self.base_model_args))
+            self._models.append(self.base_model_class(**self._base_model_args))
 
     def _select_rows(self, data, window_index):
         start = self._internal_windows[window_index] - self.padding

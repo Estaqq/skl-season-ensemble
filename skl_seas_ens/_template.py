@@ -156,12 +156,12 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             base_model_class = LogisticRegression,
             base_model_args = {}, 
             window_size = None,
-            window_start = 0,
-            window_end = 365,
+            window_start = None,
+            window_end = None,
             n_windows = 10,
             windows = [],
             padding = 105,
-            time_column_name = 'day' ,
+            time_column: str | int = 0,
             drop_time_column = True,
             data_is_periodic = True
             ):
@@ -173,59 +173,75 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         self.n_windows = n_windows
         self.windows = windows
         self.padding = padding
-        self.time_column_name = time_column_name
+        self.time_column = time_column
         self.drop_time_column = drop_time_column   
         self.data_is_periodic = data_is_periodic
     
 
     def _set_up_windows(self):
-        if len(self.windows > 0):
+        if len(self.windows) > 1:
             self._internal_windows = self.windows
-        elif self.window_size is not None:
-            self._internal_windows = np.arange(self.window_start, self.window_end, self.window_size)
         else:
-            size = math.ceil((self.window_end - self.window_start) / self.n_windows)
-            self.windows = np.arange(self.window_start, self.window_end, size)
+            self._internal_windows = np.linspace(self._window_start, self._window_end, max(2, self._n_windows))
+
+    def _handle_out_of_sample_time(self, day):
+        if self.data_is_periodic:
+            return self._window_start + (day - self._window_start) % (self._window_end - self._window_start)
+        else:
+            if day <= self._window_start:
+                return self._window_start
+            elif day >= self._window_end:
+                return self._window_end 
+            else:
+                return day
+        return
 
     def _get_window(self, day):
+        day = self._handle_out_of_sample_time(day)
+        if len(self._internal_windows == 1):
+            return 0
         for i in range(len(self.windows) - 1):
-            if self._internal_windows[0] <= day < self._internal_windows[1]:
+            if self._internal_windows[i] <= day < self._internal_windows[i+1]:
                 return i
-        raise ValueError("Value of " + self.time_column_name + "is out of bounds.")
+        if day == self._internal_windows[len(self._internal_windows) - 1]:
+            return len(self._internal_windows) - 2
+        print(str(day) + " is not between " + str(self._internal_windows[0]) + " and " + str(self._internal_windows[len(self.windows) - 1]))
+        raise ValueError("Value of time column is out of bounds.")
     
     def _create_models(self):
         self._models = []
-        for i in range( len(self.windows) -1 ):
+        assert len(self._internal_windows) > 1
+        for i in range( len(self._internal_windows) -1 ):
             self._models.append(self.base_model_class(**self.base_model_args))
 
     def _select_rows(self, data, window_index):
         start = self._internal_windows[window_index] - self.padding
         end = self._internal_windows[window_index+1] + self.padding
-        selection = data[(data[self.time_column_name] >= start) & (data[self.time_column_name] < end)]
+        selection = data[(data[self._time_column] >= start) & (data[self._time_column] < end)]
         if self.data_is_periodic:
-            if start < self.window_start:
-                selection = pd.concat(selection, data[data[self.time_column_name] >= self.window_end - (self.window_start - start)])
-            if end >= self.window_end:
-                selection = pd.concat(selection, data[data[self.time_column_name] < self.window_start + (self.window_end - end)])
+            if start < self._window_start:
+                selection = pd.concat(selection, data[data[self._time_column] >= self._window_end - (self._window_start - start)])
+            if end >= self._window_end:
+                selection = pd.concat(selection, data[data[self._time_column] < self._window_start + (self._window_end - end)])
         return selection
     
     def _fit_base_models(self):
         for i in range(len(self._models)):
             selection = self._select_rows(self.X_, i)
-            if(self.drop_time_column):
-                self.models[i].fit(selection.drop(columns=[self.time_column_name]), self.y_[selection])
+            if(self._time_column):
+                self._models[i].fit(selection.drop(columns=[self._time_column]), self.y_[selection])
             else:
-                self.models[i].fit(self.X_[selection], self.y_[selection])
+                self._models[i].fit(self.X_[selection], self.y_[selection])
 
     
     def _apply_appropriate_model(self, row):
-        window = self._get_window(row[self.time_column_name])
+        window = self._get_window(row[self._time_column])
         #X = pd.DataFrame(X)
         #X = X.reindex(columns=self.feature_names_in_)
         #features = features.drop('id', axis=1)
-        if self.drop_time_column:
-            row = row.drop(self.time_column_name, axis=1)
-        model = self.models[window]
+        if self._time_column:
+            row = row.drop(self._time_column, axis=1)
+        model = self._models[window]
         return model.predict(row)[0]
         
 
@@ -264,6 +280,19 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         self.X_ = X
         self.y_ = y
 
+        # preprocess parameters
+        if type(self.time_column) is str:
+            self._time_column = self.X_.columns.get_loc(self.time_column)
+        else:
+            self._time_column = self.time_column
+        if self.window_end == None:
+            self._window_end = self.X_[self._time_column].max()
+        if self.window_start == None:
+            self._window_start = self.X_[self._time_column].min()
+        if self.window_size == None:
+            self._n_windows = self.n_windows
+        else:
+            self._n_windows = math.ceil((self._window_end - self._window_start) / self.window_size)
         self._set_up_windows()
         self._create_models()
         self._fit_base_models()
@@ -294,5 +323,6 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         # `feature_names_in_` but only check that the shape is consistent.
         X = self._validate_data(X, reset=False)
 
-        prediction = X.apply(self._apply_appropriate_model, axis='columns')
+        #prediction = X.apply(self._apply_appropriate_model, axis='columns')
+        prediction = np.apply_along_axis(self._apply_appropriate_model, 1, X)
         return prediction

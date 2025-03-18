@@ -9,7 +9,6 @@ be fitted to data from different seasons.
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, ClassifierMixin, _fit_context
-from sklearn.metrics import euclidean_distances
 from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression

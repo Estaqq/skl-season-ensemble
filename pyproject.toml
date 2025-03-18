@@ -48,14 +48,14 @@ skl_seas_ens = { path=".", editable=true }
 
 [tool.pixi.feature.lint.dependencies]
 # The version below should be aligned with the one of `.pre-commit-config.yaml`
-black = "23.3.0"
-pre-commit = "3.7.1"
-ruff = "0.4.2"
+black = "23.3.0.*"
+pre-commit = "3.7.1.*"
+ruff = "0.4.2*"
 
 [tool.pixi.feature.lint.tasks]
 black = { cmd = "black --check --diff skl_seas_ens && black --check --diff examples" }
 ruff = { cmd = "ruff check --output-format=full skl_seas_ens && ruff check --output-format=full examples" }
-lint = { depends_on = ["black", "ruff"]}
+lint = { depends-on = ["black", "ruff"]}
 
 [tool.pixi.feature.test.dependencies]
 pytest = "*"

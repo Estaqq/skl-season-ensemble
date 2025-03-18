@@ -145,21 +145,26 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     # This is a dictionary allowing to define the type of parameters.
     # It used to validate parameter within the `_fit_context` decorator.
     _parameter_constraints = {
-        "demo_param": [str],
+        "window_size": [int, float, None],
+        "window_start": [int, float, None],
+        "window_end": [int, float, None],
+        "n_windows": [int, None],
+        "windows": [list, None],
+        "padding": [int, float, None],
+        "time_column": [str, int, None],
+        "drop_time_column": [bool, None],
+        "data_is_periodic": [bool, None]
     }
-
-    def __init__(self, demo_param="demo"):
-        self.demo_param = demo_param
-
+    @_fit_context(prefer_skip_nested_validation=True)
     def __init__(
             self, 
             base_model_class = LogisticRegression,
-            base_model_args = {}, 
+            base_model_args = None, 
             window_size = None,
             window_start = None,
             window_end = None,
             n_windows = 10,
-            windows = [],
+            windows = None,
             padding = 105,
             time_column: str | int = 0,
             drop_time_column = True,
@@ -179,8 +184,9 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     
 
     def _set_up_windows(self):
-        if len(self.windows) > 1:
+        if self.windows != None:
             self._internal_windows = self.windows
+            assert len(self._internal_windows) > 1
         else:
             self._internal_windows = np.linspace(self._window_start, self._window_end, max(2, self._n_windows))
 
@@ -209,6 +215,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         raise ValueError("Value of time column is out of bounds.")
     
     def _create_models(self):
+        if self.base_model_args == None:
+            self.base_model_args = {}
         self._models = []
         assert len(self._internal_windows) > 1
         for i in range( len(self._internal_windows) -1 ):

@@ -3,12 +3,12 @@
 Plotting Template Transformer
 =============================
 
-An example plot of :class:`skltemplate.template.TemplateTransformer`
+An example plot of :class:`skl_seas_ens.template.TemplateTransformer`
 """
 import numpy as np
 from matplotlib import pyplot as plt
 
-from skltemplate import TemplateTransformer
+from skl_seas_ens import TemplateTransformer
 
 X = np.arange(50, dtype=np.float64).reshape(-1, 1)
 X /= 50

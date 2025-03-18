@@ -13,7 +13,7 @@ from importlib.metadata import version as get_version
 project = "Scikit-learn Project Template"
 copyright = "2016, V. Birodkar"
 author = "V. Birodkar"
-release = get_version('skltemplate')
+release = get_version('skl_seas_ens')
 version = ".".join(release.split(".")[:3])
 
 # -- General configuration ---------------------------------------------------
@@ -106,9 +106,9 @@ intersphinx_mapping = {
 plot_gallery = True
 
 sphinx_gallery_conf = {
-    "doc_module": "skltemplate",
+    "doc_module": "skl_seas_ens",
     "backreferences_dir": os.path.join("generated"),
     "examples_dirs": "../examples",
     "gallery_dirs": "auto_examples",
-    "reference_url": {"skltemplate": None},
+    "reference_url": {"skl_seas_ens": None},
 }

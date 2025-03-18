@@ -41,7 +41,7 @@ class TemplateEstimator(BaseEstimator):
 
     Examples TODO
     --------
-    >>> from skltemplate import TemplateEstimator
+    >>> from skl_seas_ens import TemplateEstimator
     >>> import numpy as np
     >>> X = np.arange(100).reshape(100, 1)
     >>> y = np.zeros((100, ))

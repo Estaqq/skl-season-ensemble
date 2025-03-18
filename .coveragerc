@@ -2,5 +2,5 @@
 
 [run]
 branch = True
-source = skl-seas-ens
-include = */skl-seas-ens/*
+source = skl_seas_ens
+include = */skl_seas_ens/*

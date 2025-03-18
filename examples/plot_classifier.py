@@ -3,12 +3,12 @@
 Plotting Template Classifier
 ============================
 
-An example plot of :class:`skltemplate.template.TemplateClassifier`
+An example plot of :class:`skl_seas_ens.template.TemplateClassifier`
 """
 
 # %%
 # Train our classifier on very simple dataset
-from skltemplate import TemplateClassifier
+from skl_seas_ens import TemplateClassifier
 
 X = [[0, 0], [1, 1]]
 y = [0, 1]

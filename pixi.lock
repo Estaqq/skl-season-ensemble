@@ -10180,7 +10180,7 @@ packages:
   size: 14259
   timestamp: 1620240338595
 - kind: pypi
-  name: skltemplate
+  name: skl_seas_ens
   version: 0.1.2.dev1+g939dd4e.d20240518
   path: .
   sha256: edf806caa43c79714fce94c52a481bf1eedf6cd347337b6a471e24a8f2bffedc

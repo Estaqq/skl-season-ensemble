@@ -267,7 +267,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             else:
                 self._models[i].fit(self.X_[selection,:], self.y_[selection])
     
-    def _apply_appropriate_model(self, row):
+    def _apply_appropriate_model(self, row, str_func = 'predict'):
+        '''Applies the function whose name is given in the string func of the appropriate model to a row of data.'''
         window = self._get_window(row[self._time_column])
         #X = pd.DataFrame(X)
         #X = X.reindex(columns=self.feature_names_in_)
@@ -276,7 +277,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             row = row.drop(self._time_column, axis=1)
         model = self._models[window]
         row = row.reshape(1, -1)
-        return model.predict(row)
+        func = getattr(model, str_func)
+        return func(row)
         
 
 

@@ -31,7 +31,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     base_model_args : dict, default=None
         Arguments to be passed to the base model class.
     window_size : int, float, default=None
-        The size of the windows in which the data is split.
+        The size of the windows into which the data is split.
     window_start : int, float, default=None
         The lower bound for the range for which we expect data. If None, the minimum value occuring in the training data is used.
     window_end : int, float, default=None
@@ -85,6 +85,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         "drop_time_column": [bool, None],
         "data_is_periodic": [bool, None]
     }
+
     def __init__(
             self, 
             base_model_class = LogisticRegression,
@@ -111,7 +112,6 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         self.time_column = time_column
         self.drop_time_column = drop_time_column   
         self.data_is_periodic = data_is_periodic
-    
 
     def _set_up_windows(self):
         if self.windows != None:
@@ -141,7 +141,6 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
                 return i
         if day == self._internal_windows[len(self._internal_windows) - 1]:
             return len(self._internal_windows) - 2
-        print(str(day) + " is not between " + str(self._internal_windows[0]) + " and " + str(self._internal_windows[len(self.windows) - 1]))
         raise ValueError("Value of time column is out of bounds.")
     
     def _create_models(self):
@@ -177,21 +176,17 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
                 self._models[i].fit(self.X_[selection,:], self.y_[selection])
     
     def _apply_appropriate_model(self, row, str_func = 'predict'):
-        '''Applies the function whose name is given in the string func of the appropriate model to a row of data.'''
+        #Applies the function whose name is given in the string func of the appropriate model to a row of data.
         window = self._get_window(row[self._time_column])
-        #X = pd.DataFrame(X)
-        #X = X.reindex(columns=self.feature_names_in_)
-        #features = features.drop('id', axis=1)
         if self._drop_time_column:
             row = np.delete(row, self._time_column)
         model = self._models[window]
         row = row.reshape(1, -1)
+        if not hasattr(model, str_func):
+            raise AttributeError(f"The model does not have the attribute '{str_func}'")
         func = getattr(model, str_func)
         return func(row)
         
-
-
-
     @_fit_context(prefer_skip_nested_validation=True)
     def fit(self, X, y):
         """A reference implementation of a fitting function for a classifier.
@@ -276,9 +271,6 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         #prediction = X.apply(self._apply_appropriate_model, axis='columns')
         prediction = np.apply_along_axis(self._apply_appropriate_model, 1, X).reshape(-1)
         return prediction
-
-
-
 
     def predict_proba(self, X):
         """Predict the probabilities of the input samples belonging to each class using the appropriate base model.

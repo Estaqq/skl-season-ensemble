@@ -45,7 +45,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     time_column : str, int, default=0
         The index or name of the column in the input data that contains the time information based on which data is assigned to base classifiers.
     drop_time_column : bool, default=True
-        Whether to drop the time column from the input data before passing it to the base classifiers.
+        Whether to drop the time column from the input data before passing it to the base classifiers. Ignored when the input data has only one feature.
     data_is_periodic : bool, default=True
         Whether the data is periodic. If True, data is considered to be periodic and the windows are wrapped around the window_start and window_end values.
 
@@ -96,7 +96,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             windows = None,
             padding = 105,
             time_column: str | int = 0,
-            drop_time_column = True,
+            drop_time_column = False,
             data_is_periodic = True
             ):
         super().__init__()
@@ -171,7 +171,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     def _fit_base_models(self):
         for i in range(len(self._models)):
             selection = self._select_rows(self.X_, i)
-            if(self._time_column):
+            if(self._drop_time_column):
                 self._models[i].fit(np.delete(self.X_[selection,:], self._time_column,axis = 1), self.y_[selection])
             else:
                 self._models[i].fit(self.X_[selection,:], self.y_[selection])
@@ -182,8 +182,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         #X = pd.DataFrame(X)
         #X = X.reindex(columns=self.feature_names_in_)
         #features = features.drop('id', axis=1)
-        if self._time_column:
-            row = row.drop(self._time_column, axis=1)
+        if self._drop_time_column:
+            row = np.delete(row, self._time_column)
         model = self._models[window]
         row = row.reshape(1, -1)
         func = getattr(model, str_func)
@@ -239,6 +239,10 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             self._n_windows = self.n_windows
         else:
             self._n_windows = math.ceil((self._window_end - self._window_start) / self.window_size)
+        if self.n_features_in_ == 1:
+            self._drop_time_column = False
+        else:
+            self._drop_time_column = self.drop_time_column
 
         self._set_up_windows()
         self._create_models()

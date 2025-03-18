@@ -140,7 +140,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     data_is_periodic : bool, default=True
         Whether the data is periodic. If True, data is considered to be periodic and the windows are wrapped around the window_start and window_end values.
 
-    Attributes TODO
+    Attributes 
     ----------
     X_ : ndarray, shape (n_samples, n_features)
         The input passed during :meth:`fit`.

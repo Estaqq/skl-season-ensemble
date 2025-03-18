@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator, ClassifierMixin, TransformerMixin, _fit_context
 from sklearn.metrics import euclidean_distances
 from sklearn.utils.multiclass import check_classification_targets
-from sklearn.utils.validation import check_is_fitted
+from sklearn.utils.validation import check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
 import math
 
@@ -275,6 +275,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         # - run different checks on the input data;
         # - define some attributes associated to the input data: `n_features_in_` and
         #   `feature_names_in_`.
+        check_X_y(X, y)
         X, y = self._validate_data(X, y)
         # We need to make sure that we have a classification task
         check_classification_targets(y)
@@ -331,5 +332,5 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         X = self._validate_data(X, reset=False)
 
         #prediction = X.apply(self._apply_appropriate_model, axis='columns')
-        prediction = np.apply_along_axis(self._apply_appropriate_model, 1, X)
+        prediction = np.apply_along_axis(self._apply_appropriate_model, 1, X).reshape(-1)
         return prediction

@@ -11,7 +11,7 @@ def test_all_estimators():
     assert len(estimators) == 3
 
     estimators = all_estimators(type_filter="classifier")
-    assert len(estimators) == 1
+    assert len(estimators) == 2 #LogisicRegression Classifier is being imported
 
     estimators = all_estimators(type_filter=["classifier", "transformer"])
     assert len(estimators) == 2

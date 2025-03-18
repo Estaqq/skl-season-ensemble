@@ -219,15 +219,12 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         end = self._internal_windows[window_index+1] + self.padding
 
         mask = (data[:,self._time_column] >= start) & (data[:,self._time_column] < end)
-        #selection = data[mask, :]
         if self.data_is_periodic:
             if start < self._window_start:
                 mask1 = (data[:,self._time_column] >= self._window_end - (self._window_start - start))
-                #selection = np.concatenate((selection, data[mask,:]), axis=0)
                 mask = mask | mask1
             if end >= self._window_end:
                 mask2 = (data[:,self._time_column] < self._window_start + (end - self._window_end))
-                # selection = np.concatenate((selection, data[mask,:]), axis=0)
                 mask = mask | mask2
         return mask
     

@@ -249,7 +249,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         return self
 
     def predict(self, X):
-        """A reference implementation of a prediction for a classifier.
+        """ Predict using the appropriate base model. 
 
         Parameters
         ----------
@@ -259,8 +259,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         Returns
         -------
         y : ndarray, shape (n_samples,)
-            The label for each sample is the label of the closest sample
-            seen during fit.
+            The predicted labels for the input samples.
         """
         # Check if fit had been called
         check_is_fitted(self)
@@ -272,4 +271,46 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
 
         #prediction = X.apply(self._apply_appropriate_model, axis='columns')
         prediction = np.apply_along_axis(self._apply_appropriate_model, 1, X).reshape(-1)
+        return prediction
+
+
+
+
+    def predict_proba(self, X):
+        """Predict the probabilities of the input samples belonging to each class using the appropriate base model.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input samples.
+        Returns
+        -------
+        y : ndarray, shape (n_samples, n_classes)
+            The predicted probabilities of the input samples belonging to each class.
+        """
+        check_is_fitted(self)
+        X = self._validate_data(X, reset=False)
+
+        apply_proba = lambda row: self._apply_appropriate_model(row, str_func='predict_proba')
+        prediction = np.apply_along_axis(apply_proba, 1, X).reshape(-1, len(self.classes_))
+        return prediction
+
+    def predict_log_proba(self, X):
+        """Predict the log-probabilities of the input samples belonging to each class using the appropriate base model.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input samples.
+        Returns
+        -------
+        y : ndarray, shape (n_samples, n_classes)
+            The predicted log.probabilities of the input samples belonging to each class.
+
+        """
+        check_is_fitted(self)
+        X = self._validate_data(X, reset=False)
+
+        apply_log_proba = lambda row: self._apply_appropriate_model(row, str_func='predict_log_proba')
+        prediction = np.apply_along_axis(apply_log_proba, 1, X).reshape(-1, len(self.classes_))
         return prediction

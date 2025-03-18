@@ -13,7 +13,7 @@ from sklearn.metrics import euclidean_distances
 from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted
 from sklearn.linear_model import LogisticRegression
-import math.ceil
+import math
 
 
 class TemplateEstimator(BaseEstimator):

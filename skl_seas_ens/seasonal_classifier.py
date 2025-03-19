@@ -43,6 +43,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         The distance in time units away from some window for which data is still considered for training the classifier for that particular window.
     time_column : str, int, default=0
         The index or name of the column in the input data that contains the time information based on which data is assigned to base classifiers.
+        Strings can only be passed, if the input data is a pandas DataFrame or Series.
     drop_time_column : bool, default=True
         Whether to drop the time column from the input data before passing it to the base classifiers. Ignored when the input data has only one feature.
     data_is_periodic : bool, default=True
@@ -203,6 +204,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         self : object
             Returns self.
         """
+
+
         # `_validate_data` is defined in the `BaseEstimator` class.
         # It allows to:
         # - run different checks on the input data;
@@ -212,7 +215,6 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         X, y = self._validate_data(X, y)
         self._validate_params()
         check_classification_targets(y)
-
         # classifier should always store the classes seen during `fit`
         self.classes_ = np.unique(y)
 
@@ -220,9 +222,11 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         self.X_ = X
         self.y_ = y
 
+
         # preprocess parameters
         if type(self.time_column) is str:
-            self._time_column = self.X_.columns.get_loc(self.time_column)
+            assert((type(X) is pd.DataFrame) or (type(X) is pd.Series))
+            self._time_column = X.columns.get_loc(self.time_column)
         else:
             self._time_column = self.time_column
         if self.window_end == None:

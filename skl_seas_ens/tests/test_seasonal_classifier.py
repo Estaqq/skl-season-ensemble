@@ -265,3 +265,77 @@ def test_fit_base_models():
 
     copied_model.fit(X[seasonal_clf._select_rows(X.values, 0)], y)
     assert (copied_model.coef_ == seasonal_clf._models[0].coef_).all()
+
+    base_model = LogisticRegression(random_state=0,max_iter=10000)
+    base_model.fit(X,y)
+    assert (base_model.coef_ == copied_model.coef_).all()
+
+
+def test_seasonal_classifier_drop_time_data():
+    # Load the dataset from the CSV file
+    df = pd.read_csv('examples/data/train.csv')
+    # Extract features and target
+    X = df.drop(columns=['rainfall'])
+    #X = df.drop(columns=['rainfall','id'])
+
+    y = df['rainfall']
+    
+    # Initialize the base classifier
+    base_clf = LogisticRegression(random_state=0,max_iter=10000)
+    
+    # Initialize the SeasonalClassifier with the base classifier
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=15, padding= 20,
+                                      base_model_args={'random_state': 0,'max_iter' : 10000}, 
+                                      time_column='day', data_is_periodic=True, 
+                                      drop_time_column=True,
+                                      col_names= df.columns)
+    
+    # Fit both classifiers
+    X_drop_time = X.drop(columns=['day']).values
+    base_clf.fit(X_drop_time, y)
+    seasonal_clf.fit(X, y)
+    
+    assert (X_drop_time == np.delete(seasonal_clf.X_, seasonal_clf._time_column, axis = 1)).all()
+    
+
+
+def test_seasonal_classifier_fit_base_model_drop_data():
+    # Load the dataset from the CSV file
+    df = pd.read_csv('examples/data/train.csv')
+    
+    # Extract features and target
+    X = df.drop(columns=['rainfall'])
+    #X = df.drop(columns=['rainfall','id'])
+
+    X['dummy'] = df['id']
+    y = df['rainfall']
+    
+    # Initialize the base classifier
+    base_clf = LogisticRegression(random_state=0,max_iter=10000)
+    
+    # Initialize the SeasonalClassifier with the base classifier
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=1, 
+                                      base_model_args={'random_state': 0,'max_iter' : 10000}, 
+                                      time_column='day', data_is_periodic=True, 
+                                      drop_time_column=True,
+                                      col_names= df.columns)
+    
+    # Fit both classifiers
+    X_drop_time = X.drop(columns=['day']).values
+    base_clf.fit(X_drop_time, y)
+    seasonal_clf.fit(X, y)
+    
+    assert (X_drop_time == np.delete(seasonal_clf.X_, seasonal_clf._time_column, axis = 1)).all()
+
+    #base_clf.fit(X.drop(columns=['day']), y)
+    
+    # Predict with both classifiers
+    #base_pred = base_clf.predict(X.drop(columns=['day']))
+    base_pred = base_clf.predict(X_drop_time)
+
+    seasonal_pred = seasonal_clf.predict(X)
+    
+    assert (base_clf.coef_ == seasonal_clf._models[0].coef_).all()
+
+    # Assert that the predictions are the same
+    assert (base_pred == seasonal_pred).all()

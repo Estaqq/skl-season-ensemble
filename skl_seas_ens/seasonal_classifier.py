@@ -245,7 +245,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             if ((type(X) is pd.DataFrame) or (type(X) is pd.Series)):
                 self._time_column = X.columns.get_loc(self.time_column) - 1
             elif self.col_names is not None:
-                self._time_column = self.col_names.get_loc(self.time_column) -1
+                self._time_column = self.col_names.get_loc(self.time_column)
+                assert (type(self._time_column) is int)
             else:
                 raise ValueError("SeasonalClassifier If the time_column is provided as a string, the column names must be provided as well.")
         else: #time_column is an integer

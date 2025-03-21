@@ -45,7 +45,7 @@ def test_seasonal_classifier_with_dataframe():
     df['time'] = time_data
     
     # Initialize the SeasonalClassifier with RandomForestClassifier
-    seasonal_clf = SeasonalClassifier(base_model_class=RandomForestClassifier,time_column= 'time', n_windows=1, base_model_args={'random_state': 42})
+    seasonal_clf = SeasonalClassifier(base_model_class=RandomForestClassifier,time_column= 'time', n_windows=1, base_model_args={'random_state': 42}, col_names= df.columns)
     
     # Fit the classifier
     seasonal_clf.fit(df.drop(columns=['target']), df['target'])

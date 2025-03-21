@@ -44,6 +44,10 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     time_column : str, int, default=0
         The index or name of the column in the input data that contains the time information based on which data is assigned to base classifiers.
         Strings can only be passed, if the input data is a pandas DataFrame or Series.
+        When using SeasonalClassifier together with functions such as grid_search or cross_validate, either a numerical index must be provided,
+        or the argument col_names must also be provided, since those functions pass numpy arrays during their invocation of SeasonalClassifier.
+    col_names : list, default=None
+        The names of the columns in the input data. Only needed when the time_column is a string.
     drop_time_column : bool, default=True
         Whether to drop the time column from the input data before passing it to the base classifiers. Ignored when the input data has only one feature.
     data_is_periodic : bool, default=True
@@ -113,6 +117,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         self.time_column = time_column
         self.drop_time_column = drop_time_column   
         self.data_is_periodic = data_is_periodic
+        self.col_names = col_names
 
     def _set_up_windows(self):
         if self.windows != None:
@@ -184,7 +189,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         model = self._models[window]
         row = row.reshape(1, -1)
         if not hasattr(model, str_func):
-            raise AttributeError(f"The model does not have the attribute '{str_func}'")
+            raise AttributeError(f"The base model does not have the attribute '{str_func}'")
         func = getattr(model, str_func)
         return func(row)
         
@@ -226,9 +231,13 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
 
         # preprocess parameters
         if type(self.time_column) is str:
-            assert((type(X) is pd.DataFrame) or (type(X) is pd.Series))
-            self._time_column = X.columns.get_loc(self.time_column)
-        else:
+            if ((type(X) is pd.DataFrame) or (type(X) is pd.Series)):
+                self._time_column = X.columns.get_loc(self.time_column) - 1
+            elif self.col_names is not None:
+                self._time_column = self.col_names.get_loc(self.time_column) -1
+            else:
+                raise ValueError("SeasonalClassifier If the time_column is provided as a string, the column names must be provided as well.")
+        else: #time_column is an integer
             self._time_column = self.time_column
         if self.window_end == None:
             self._window_end = self.X_[self._time_column].max()

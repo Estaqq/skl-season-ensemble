@@ -212,5 +212,32 @@ def test_seasonal_classifier_with_csv_data():
     base_pred = base_clf.predict(X.drop(columns=['day']))
     seasonal_pred = seasonal_clf.predict(X)
     
+    assert (base_clf.coef_ == seasonal_clf._models[0].coef_).all()
+
     # Assert that the predictions are the same
     assert (base_pred == seasonal_pred).all()
+
+def test_select_rows_with_one_window():
+    # Create a random dataset
+    X, y = make_classification(n_samples=100, n_features=8, random_state=42)
+    
+    # Generate random time data between 1 and 7
+    time_data = np.random.randint(1, 8, size=len(y))
+    
+    # Create a DataFrame
+    df = pd.DataFrame(X, columns=[f'feature_{i}' for i in range(X.shape[1])])
+    df['target'] = y
+    df['time'] = time_data
+    
+    # Initialize the SeasonalClassifier with one window
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, time_column='time', n_windows=1, base_model_args={'random_state': 42}, col_names=df.columns)
+    
+    # Fit the classifier
+    seasonal_clf.fit(df.drop(columns=['target']), df['target'])
+    
+    # Select rows for the single window
+    selected_rows = seasonal_clf._select_rows(df.values, 0)
+    
+    # Assert that all rows are selected
+    assert selected_rows.all()
+    assert len(selected_rows) == len(df)

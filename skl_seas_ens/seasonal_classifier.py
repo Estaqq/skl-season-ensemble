@@ -179,6 +179,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
     
     def _fit_base_models(self):
         for i in range(len(self._models)):
+            assert self.n_features_in_ == self.X_.shape[1]
             selection = self._select_rows(self.X_, i)
             if(self._drop_time_column):
                 self._models[i].fit(np.delete(self.X_[selection,:], self._time_column,axis = 1), self.y_[selection])

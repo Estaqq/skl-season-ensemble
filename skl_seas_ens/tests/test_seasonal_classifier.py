@@ -275,7 +275,9 @@ def test_fit_base_models():
     y = df['rainfall']
     
     # Initialize and fit SeasonalClassifier with one window
-    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, time_column='day', n_windows=1, base_model_args={'random_state': 42, 'max_iter': 10000}, col_names=df.columns)
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, base_model_args={'random_state': 0, 'max_iter': 10000},
+                                       time_column='day', n_windows=1,
+                                         col_names=df.columns)
     seasonal_clf.fit(X, y)
 
     # Copy and refit the first base model
@@ -284,8 +286,6 @@ def test_fit_base_models():
 
     # Assert that the coefficients are the same
     assert (copied_model.coef_ == seasonal_clf._models[0].coef_).all()
-
-
 
     copied_model.fit(X[seasonal_clf._select_rows(X.values, 0)], y)
     assert (copied_model.coef_ == seasonal_clf._models[0].coef_).all()

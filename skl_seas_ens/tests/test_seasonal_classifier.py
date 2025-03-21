@@ -242,6 +242,30 @@ def test_select_rows_with_one_window():
     assert selected_rows.all()
     assert len(selected_rows) == len(df)
 
+def test_select_rows_with_multiple_windows():
+    X, y = make_classification(n_samples=100, n_features=8, random_state=0)
+    
+    # Generate random time data between 1 and 7
+    time_data = np.random.randint(1, 8, size=len(y))
+
+    # Create a DataFrame
+    df = pd.DataFrame(X, columns=[f'feature_{i}' for i in range(X.shape[1])])
+    df['target'] = y
+    df['time'] = time_data
+    X= df.drop(columns=['target'])
+
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, time_column='time', n_windows=10, 
+                                      base_model_args={'random_state': 42}, col_names=X.columns,padding = 400)    
+    # Fit the classifier
+    seasonal_clf.fit(X, df['target'])
+    
+    # Select rows for the single window
+    selected_rows = seasonal_clf._select_rows(df.values, 1)
+    
+    # Assert that all rows are selected
+    assert selected_rows.all()
+    assert len(selected_rows) == len(df)
+
 def test_fit_base_models():
     # Load the dataset from the CSV file
     df = pd.read_csv('examples/data/train.csv')

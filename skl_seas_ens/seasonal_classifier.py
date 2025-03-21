@@ -87,7 +87,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         "padding": [int, float, None],
         "time_column": [str, int, None],
         "drop_time_column": [bool, None],
-        "data_is_periodic": [bool, None]
+        "data_is_periodic": [bool, None],
+        "verbose": [bool]
     }
 
     def __init__(
@@ -103,7 +104,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             time_column: str | int = 0,
             col_names : list | None = None,
             drop_time_column: bool = False,
-            data_is_periodic: bool = True
+            data_is_periodic: bool = True,
+            verbose: bool = False
             ):
         super().__init__()
         self.base_model_class = base_model_class
@@ -118,6 +120,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         self.drop_time_column = drop_time_column   
         self.data_is_periodic = data_is_periodic
         self.col_names = col_names
+        self.verbose = verbose
 
     def _set_up_windows(self):
         if self.windows != None:
@@ -180,6 +183,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
                 self._models[i].fit(np.delete(self.X_[selection,:], self._time_column,axis = 1), self.y_[selection])
             else:
                 self._models[i].fit(self.X_[selection,:], self.y_[selection])
+            if self.verbose:
+                print(f"Model {i} fitted with {len(self.X_[selection])} samples.")  
     
     def _apply_appropriate_model(self, row, str_func = 'predict'):
         #Applies the function whose name is given in the string func of the appropriate model to a row of data.

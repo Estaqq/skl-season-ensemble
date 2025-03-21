@@ -199,10 +199,10 @@ def test_seasonal_classifier_with_csv_data():
     y = df['rainfall']
     
     # Initialize the base classifier
-    base_clf = LogisticRegression(random_state=42)
+    base_clf = LogisticRegression(random_state=42,max_iter=10000)
     
     # Initialize the SeasonalClassifier with the base classifier
-    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=1, base_model_args={'random_state': 42}, time_column='day', data_is_periodic=True,drop_time_column=True, col_names= df.columns)
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=1, base_model_args={'random_state': 42,'max_iter' : 10000}, time_column='day', data_is_periodic=True,drop_time_column=True, col_names= df.columns)
     
     # Fit both classifiers
     base_clf.fit(X.drop(columns=['day']), y)

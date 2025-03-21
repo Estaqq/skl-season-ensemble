@@ -217,7 +217,7 @@ def test_seasonal_classifier_with_csv_data():
 
 def test_select_rows_with_one_window():
     # Create a random dataset
-    X, y = make_classification(n_samples=100, n_features=8, random_state=42)
+    X, y = make_classification(n_samples=100, n_features=8, random_state=0)
     
     # Generate random time data between 1 and 7
     time_data = np.random.randint(1, 8, size=len(y))

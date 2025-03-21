@@ -76,3 +76,75 @@ def test_seasonal_classifier_with_cross_validate():
     assert len(cv_results['test_score']) == 3
     assert len(cv_results['fit_time']) == 3
     assert len(cv_results['score_time']) == 3
+
+def test_cross_validate_same_as_base():
+    for baseclass in [RandomForestClassifier, LogisticRegression]:
+        # Create a random dataset
+        X, y = make_classification(n_samples=100, n_features=8, random_state=42)
+        
+        # Initialize the base classifier
+        base_clf = baseclass(random_state=42)
+        
+        # Initialize the SeasonalClassifier with the base classifier
+        seasonal_clf = SeasonalClassifier(base_model_class=baseclass, n_windows=1, base_model_args={'random_state': 42})
+        
+        # Perform cross-validation with the base classifier
+        base_cv_results = cross_validate(base_clf, X, y, cv=3)
+        
+        # Perform cross-validation with the SeasonalClassifier
+        seasonal_cv_results = cross_validate(seasonal_clf, X, y, cv=3)
+        
+        # Check that the cross-validation scores are the same
+        assert np.allclose(base_cv_results['test_score'], seasonal_cv_results['test_score'])
+
+def test_cross_validate_with_drop_time():
+    for baseclass in [RandomForestClassifier, LogisticRegression]:
+        # Create a random dataset
+        X, y = make_classification(n_samples=100, n_features=8, random_state=42)
+        
+        # Generate random time data between 1 and 7
+        time_data = np.random.randint(1, 8, size=len(y))
+        
+        # Create a DataFrame
+        df = pd.DataFrame(X, columns=[f'feature_{i}' for i in range(X.shape[1])])
+        df['target'] = y
+        df['time'] = time_data
+        
+        # Initialize the SeasonalClassifier with the base classifier and drop_time=True
+        seasonal_clf = SeasonalClassifier(base_model_class=baseclass, time_column='time', n_windows=1, base_model_args={'random_state': 42}, drop_time_column=True, col_names=df.columns)
+        
+        # Perform cross-validation with the SeasonalClassifier
+        seasonal_cv_results = cross_validate(seasonal_clf, df.drop(columns=['target']), df['target'], cv=3)
+        
+        # Initialize the base classifier
+        base_clf = baseclass(random_state=42)
+        
+        # Perform cross-validation with the base classifier
+        base_cv_results = cross_validate(base_clf, df.drop(columns=['target','time']), y, cv=3)
+        
+        # Check that the cross-validation scores are the same
+        assert np.allclose(base_cv_results['test_score'], seasonal_cv_results['test_score'])
+
+        
+def test_cross_validate_same_as_base_ROC_ACC():
+    scoring = {'AUC': 'roc_auc', 'Accuracy': 'accuracy'}
+    for baseclass in [RandomForestClassifier, LogisticRegression]:
+        # Create a random dataset
+        X, y = make_classification(n_samples=100, n_features=8, random_state=42)
+        
+        # Initialize the base classifier
+        base_clf = baseclass(random_state=42)
+        
+        # Initialize the SeasonalClassifier with the base classifier
+        seasonal_clf = SeasonalClassifier(base_model_class=baseclass, n_windows=1, base_model_args={'random_state': 42})
+        
+        # Perform cross-validation with the base classifier
+        base_cv_results = cross_validate(base_clf, X, y, cv=3, scoring=scoring)
+        
+        # Perform cross-validation with the SeasonalClassifier
+        seasonal_cv_results = cross_validate(seasonal_clf, X, y, cv=3, scoring=scoring)
+        
+        # Check that the cross-validation scores are the same
+        for metric in scoring.keys():
+            assert np.allclose(base_cv_results[f'test_{metric}'], seasonal_cv_results[f'test_{metric}'])
+

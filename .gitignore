@@ -78,3 +78,4 @@ target/
 skl_seas_ens/_version.py
 test_main.py
 pixi.lock
+.vscode/settings.json

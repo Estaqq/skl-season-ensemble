@@ -196,7 +196,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         model = self._models[window]
         row = row.reshape(1, -1)
         if not hasattr(model, str_func):
-            raise AttributeError(f"The base model does not have the attribute '{str_func}'")
+            raise AttributeError(f"The base model does not have the method '{str_func}'")
         func = getattr(model, str_func)
         return func(row)
         

@@ -166,6 +166,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         start = self._internal_windows[window_index] - self.padding
         end = self._internal_windows[window_index+1] + self.padding
 
+        #TODO: Make sure rows are added only once
         mask = (data[:,self._time_column] >= start) & (data[:,self._time_column] < end)
         if self.data_is_periodic:
             if start < self._window_start:

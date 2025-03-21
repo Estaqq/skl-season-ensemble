@@ -148,3 +148,24 @@ def test_cross_validate_same_as_base_ROC_ACC():
         for metric in scoring.keys():
             assert np.allclose(base_cv_results[f'test_{metric}'], seasonal_cv_results[f'test_{metric}'])
 
+def test_data_is_periodic_irrelevant_with_one_window():
+    # Create a random dataset
+    X, y = make_classification(n_samples=100, n_features=8, random_state=42)
+    
+    # Initialize the SeasonalClassifier with data_is_periodic=True and n_windows=1
+    seasonal_clf_periodic = SeasonalClassifier(base_model_class=RandomForestClassifier, n_windows=1, base_model_args={'random_state': 42}, data_is_periodic=True)
+    
+    # Initialize the SeasonalClassifier with data_is_periodic=False and n_windows=1
+    seasonal_clf_non_periodic = SeasonalClassifier(base_model_class=RandomForestClassifier, n_windows=1, base_model_args={'random_state': 42}, data_is_periodic=False)
+    
+    # Fit both classifiers
+    seasonal_clf_periodic.fit(X, y)
+    seasonal_clf_non_periodic.fit(X, y)
+    
+    # Predict with both classifiers
+    periodic_pred = seasonal_clf_periodic.predict(X)
+    non_periodic_pred = seasonal_clf_non_periodic.predict(X)
+    
+    # Assert that the predictions are the same
+    assert (periodic_pred == non_periodic_pred).all()
+

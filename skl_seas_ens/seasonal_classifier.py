@@ -235,9 +235,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         # classifier should always store the classes seen during `fit`
         self.classes_ = np.unique(y)
 
-        # Store the training data to predict later
-        self.X_ = X
-        self.y_ = y
+
 
 
         # preprocess parameters
@@ -251,6 +249,18 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
                 raise ValueError("SeasonalClassifier If the time_column is provided as a string, the column names must be provided as well.")
         else: #time_column is an integer
             self._time_column = self.time_column
+
+        # Store the training data to predict later
+        if type(X) is pd.DataFrame or type(X) is pd.Series:
+            self.X_ = X.values
+        else:
+            self.X_ = X
+        if type(y) is pd.Series:
+            self.y_ = y.values
+        else:
+            self.y_ = y
+        assert self.n_features_in_ == self.X_.shape[1], "Number of columns in X_ does not match n_features_in_"
+
         if self.window_end == None:
             self._window_end = self.X_[:,self._time_column].max()
         else:

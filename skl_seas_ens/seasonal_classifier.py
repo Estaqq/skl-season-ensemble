@@ -12,6 +12,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin, _fit_context
 from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
+#import sklearn.utils.validation as validation
 import math
 
 
@@ -224,6 +225,10 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         #   `feature_names_in_`.
         check_X_y(X, y)
         X, y = self._validate_data(X, y)
+        
+        #TODO: Why does new scikit 1.6 version of input validation not work?
+        #X,y = validation.validate_data(X, y)
+
         self._validate_params()
         check_classification_targets(y)
         # classifier should always store the classes seen during `fit`

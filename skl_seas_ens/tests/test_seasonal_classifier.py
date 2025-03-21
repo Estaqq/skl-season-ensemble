@@ -153,10 +153,10 @@ def test_data_is_periodic_irrelevant_with_one_window():
     X, y = make_classification(n_samples=100, n_features=8, random_state=42)
     
     # Initialize the SeasonalClassifier with data_is_periodic=True and n_windows=1
-    seasonal_clf_periodic = SeasonalClassifier(base_model_class=RandomForestClassifier, n_windows=1, base_model_args={'random_state': 42}, data_is_periodic=True)
+    seasonal_clf_periodic = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=1, base_model_args={'random_state': 42}, data_is_periodic=True)
     
     # Initialize the SeasonalClassifier with data_is_periodic=False and n_windows=1
-    seasonal_clf_non_periodic = SeasonalClassifier(base_model_class=RandomForestClassifier, n_windows=1, base_model_args={'random_state': 42}, data_is_periodic=False)
+    seasonal_clf_non_periodic = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=1, base_model_args={'random_state': 42}, data_is_periodic=False)
     
     # Fit both classifiers
     seasonal_clf_periodic.fit(X, y)
@@ -168,16 +168,16 @@ def test_data_is_periodic_irrelevant_with_one_window():
     
     # Assert that the predictions are the same
     assert (periodic_pred == non_periodic_pred).all()
-    
+
 def test_padding_irrelevant_with_one_window():
     # Create a random dataset
     X, y = make_classification(n_samples=100, n_features=8, random_state=42)
     
     # Initialize the SeasonalClassifier with padding=0, n_windows=1, and data_is_periodic=True
-    seasonal_clf_no_padding = SeasonalClassifier(base_model_class=RandomForestClassifier, n_windows=1, base_model_args={'random_state': 42}, padding=0, data_is_periodic=True)
+    seasonal_clf_no_padding = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=1, base_model_args={'random_state': 42}, padding=0, data_is_periodic=True)
     
     # Initialize the SeasonalClassifier with padding=100, n_windows=1, and data_is_periodic=True
-    seasonal_clf_with_padding = SeasonalClassifier(base_model_class=RandomForestClassifier, n_windows=1, base_model_args={'random_state': 42}, padding=100, data_is_periodic=True)
+    seasonal_clf_with_padding = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=1, base_model_args={'random_state': 42}, padding=100, data_is_periodic=True)
     
     # Fit both classifiers
     seasonal_clf_no_padding.fit(X, y)
@@ -189,3 +189,28 @@ def test_padding_irrelevant_with_one_window():
     
     # Assert that the predictions are the same
     assert (no_padding_pred == with_padding_pred).all()
+
+def test_seasonal_classifier_with_csv_data():
+    # Load the dataset from the CSV file
+    df = pd.read_csv('examples/data/train.csv')
+    
+    # Extract features and target
+    X = df.drop(columns=['rainfall'])
+    y = df['rainfall']
+    
+    # Initialize the base classifier
+    base_clf = LogisticRegression(random_state=42)
+    
+    # Initialize the SeasonalClassifier with the base classifier
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, n_windows=1, base_model_args={'random_state': 42}, time_column='day', data_is_periodic=True,drop_time_column=True, col_names= df.columns)
+    
+    # Fit both classifiers
+    base_clf.fit(X.drop(columns=['day']), y)
+    seasonal_clf.fit(X, y)
+    
+    # Predict with both classifiers
+    base_pred = base_clf.predict(X.drop(columns=['day']))
+    seasonal_pred = seasonal_clf.predict(X)
+    
+    # Assert that the predictions are the same
+    assert (base_pred == seasonal_pred).all()

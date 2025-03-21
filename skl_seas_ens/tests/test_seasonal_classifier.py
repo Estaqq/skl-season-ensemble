@@ -168,4 +168,24 @@ def test_data_is_periodic_irrelevant_with_one_window():
     
     # Assert that the predictions are the same
     assert (periodic_pred == non_periodic_pred).all()
-
+    
+def test_padding_irrelevant_with_one_window():
+    # Create a random dataset
+    X, y = make_classification(n_samples=100, n_features=8, random_state=42)
+    
+    # Initialize the SeasonalClassifier with padding=0, n_windows=1, and data_is_periodic=True
+    seasonal_clf_no_padding = SeasonalClassifier(base_model_class=RandomForestClassifier, n_windows=1, base_model_args={'random_state': 42}, padding=0, data_is_periodic=True)
+    
+    # Initialize the SeasonalClassifier with padding=100, n_windows=1, and data_is_periodic=True
+    seasonal_clf_with_padding = SeasonalClassifier(base_model_class=RandomForestClassifier, n_windows=1, base_model_args={'random_state': 42}, padding=100, data_is_periodic=True)
+    
+    # Fit both classifiers
+    seasonal_clf_no_padding.fit(X, y)
+    seasonal_clf_with_padding.fit(X, y)
+    
+    # Predict with both classifiers
+    no_padding_pred = seasonal_clf_no_padding.predict(X)
+    with_padding_pred = seasonal_clf_with_padding.predict(X)
+    
+    # Assert that the predictions are the same
+    assert (no_padding_pred == with_padding_pred).all()

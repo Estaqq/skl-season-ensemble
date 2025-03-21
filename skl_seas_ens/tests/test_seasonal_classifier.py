@@ -42,17 +42,16 @@ def test_seasonal_classifier_with_dataframe():
     # Create a DataFrame
     df = pd.DataFrame(X, columns=[f'feature_{i}' for i in range(X.shape[1])])
     time_data = pd.Series(np.random.randint(1, 8, size=len(y)))
-    df['target'] = y
     df['time'] = time_data
     
     # Initialize the SeasonalClassifier with RandomForestClassifier
     seasonal_clf = SeasonalClassifier(base_model_class=RandomForestClassifier,time_column= 'time', n_windows=1, base_model_args={'random_state': 42}, col_names= df.columns)
     
     # Fit the classifier
-    seasonal_clf.fit(df.drop(columns=['target']), df['target'])
+    seasonal_clf.fit(df, y)
     
     # Predict
-    predictions = seasonal_clf.predict(df.drop(columns=['target']))
+    predictions = seasonal_clf.predict(df)
     
     # Check the length of predictions
     assert len(predictions) == len(df)
@@ -107,20 +106,19 @@ def test_cross_validate_with_drop_time():
         
         # Create a DataFrame
         df = pd.DataFrame(X, columns=[f'feature_{i}' for i in range(X.shape[1])])
-        df['target'] = y
         df['time'] = time_data
         
         # Initialize the SeasonalClassifier with the base classifier and drop_time=True
         seasonal_clf = SeasonalClassifier(base_model_class=baseclass, time_column='time', n_windows=1, base_model_args={'random_state': 42}, drop_time_column=True, col_names=df.columns)
         
         # Perform cross-validation with the SeasonalClassifier
-        seasonal_cv_results = cross_validate(seasonal_clf, df.drop(columns=['target']), df['target'], cv=3)
+        seasonal_cv_results = cross_validate(seasonal_clf, df, y, cv=3)
         
         # Initialize the base classifier
         base_clf = baseclass(random_state=42)
         
         # Perform cross-validation with the base classifier
-        base_cv_results = cross_validate(base_clf, df.drop(columns=['target','time']), y, cv=3)
+        base_cv_results = cross_validate(base_clf, df.drop(columns=['time']), y, cv=3)
         
         # Check that the cross-validation scores are the same
         assert np.allclose(base_cv_results['test_score'], seasonal_cv_results['test_score'])
@@ -228,13 +226,15 @@ def test_select_rows_with_one_window():
     df = pd.DataFrame(X, columns=[f'feature_{i}' for i in range(X.shape[1])])
     df['target'] = y
     df['time'] = time_data
-    
+    X= df.drop(columns=['target'])
+
     # Initialize the SeasonalClassifier with one window
-    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, time_column='time', n_windows=1, base_model_args={'random_state': 42}, col_names=df.columns)
-    
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, time_column='time', n_windows=1, base_model_args={'random_state': 42}, col_names=X.columns)    
     # Fit the classifier
-    seasonal_clf.fit(df.drop(columns=['target']), df['target'])
+    seasonal_clf.fit(X, df['target'])
     
+    assert seasonal_clf._time_column == X.columns.get_loc('time')
+
     # Select rows for the single window
     selected_rows = seasonal_clf._select_rows(df.values, 0)
     

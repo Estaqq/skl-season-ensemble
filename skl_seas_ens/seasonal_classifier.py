@@ -90,15 +90,16 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             self, 
             base_model_class = LogisticRegression,
             base_model_args = None, 
-            window_size = None,
-            window_start = None,
-            window_end = None,
-            n_windows = 10,
-            windows = None,
-            padding = 105,
+            window_size: int | float | None = None,
+            window_start: int | float | None = None,
+            window_end: int | float | None = None,
+            n_windows: int | None  = 10,
+            windows: list | None = None,
+            padding: int | float = 105,
             time_column: str | int = 0,
-            drop_time_column = False,
-            data_is_periodic = True
+            col_names : list | None = None,
+            drop_time_column: bool = False,
+            data_is_periodic: bool = True
             ):
         super().__init__()
         self.base_model_class = base_model_class

@@ -241,3 +241,27 @@ def test_select_rows_with_one_window():
     # Assert that all rows are selected
     assert selected_rows.all()
     assert len(selected_rows) == len(df)
+
+def test_fit_base_models():
+    # Load the dataset from the CSV file
+    df = pd.read_csv('examples/data/train.csv')
+    
+    # Extract features and target
+    X = df.drop(columns=['rainfall'])
+    y = df['rainfall']
+    
+    # Initialize and fit SeasonalClassifier with one window
+    seasonal_clf = SeasonalClassifier(base_model_class=LogisticRegression, time_column='day', n_windows=1, base_model_args={'random_state': 42, 'max_iter': 10000}, col_names=df.columns)
+    seasonal_clf.fit(X, y)
+
+    # Copy and refit the first base model
+    copied_model = clone(seasonal_clf._models[0])
+    copied_model.fit(X, y)
+
+    # Assert that the coefficients are the same
+    assert (copied_model.coef_ == seasonal_clf._models[0].coef_).all()
+
+
+
+    copied_model.fit(X[seasonal_clf._select_rows(X.values, 0)], y)
+    assert (copied_model.coef_ == seasonal_clf._models[0].coef_).all()

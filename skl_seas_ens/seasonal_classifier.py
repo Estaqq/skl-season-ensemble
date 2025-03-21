@@ -252,9 +252,13 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         else: #time_column is an integer
             self._time_column = self.time_column
         if self.window_end == None:
-            self._window_end = self.X_[self._time_column].max()
+            self._window_end = self.X_[:,self._time_column].max()
+        else:
+            self._window_end = self.window_end
         if self.window_start == None:
-            self._window_start = self.X_[self._time_column].min()
+            self._window_start = self.X_[:,self._time_column].min()
+        else:
+            self._window_start = self.window_start
         if self.window_size == None:
             self._n_windows = self.n_windows
         else:

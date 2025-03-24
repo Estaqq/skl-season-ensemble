@@ -15,7 +15,7 @@ easily be modeled by adding trend/season features. Moreover, since
 we exclude temporally far removed data from training, it is best suited
 for use cases where training data is plentiful.
 
-It is a classifier compliant to the requirements for an
+skl_seas_ens is a classifier compliant to the requirements for an
 skl classifier, see https://scikit-learn.org/stable/developers/develop.html.
 Thus is is compatible with methods such as sklearn.model_selection.GridSearchCV
  and sklearn.model_selection.cross_validate.

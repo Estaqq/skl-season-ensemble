@@ -4,7 +4,7 @@ trend/seasonal features
 ============================================================
 
 **skl_seas_ens** is a classifier which manages a ensemble of base classifiers.
-We evaluating, we choose the base classifier which is responsible for the
+When evaluating, we choose the base classifier which is responsible for the
 'season' which our data belongs to, which is determined based on a 'temporal' feature
 of our data. When training this classifier, we exclude data which is temporally to 
 far removed from the season it is responsible for.

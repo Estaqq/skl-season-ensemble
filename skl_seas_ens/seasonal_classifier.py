@@ -13,6 +13,7 @@ from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import validate_data
+#import sklearn.utils.validation as validation
 import math
 
 

@@ -251,7 +251,8 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
                 self._time_column = self.col_names.get_loc(self.time_column)
                 assert isinstance(self._time_column, int)
             else:
-                raise ValueError("SeasonalClassifier If the time_column is provided as a string, the column names must be provided as well.")
+                raise ValueError("SeasonalClassifier If the time_column is provided as a string, \
+                the column names must be provided as well.")
         else: #time_column is an integer
             self._time_column = self.time_column
 

@@ -12,7 +12,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin, _fit_context
 from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted, check_X_y
 from sklearn.linear_model import LogisticRegression
-#import sklearn.utils.validation as validation
+from sklearn.utils.validation import validate_data
 import math
 
 
@@ -202,7 +202,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         
     @_fit_context(prefer_skip_nested_validation=True)
     def fit(self, X, y):
-        """A reference implementation of a fitting function for a classifier.
+        """Fitting function of this classifier.
 
         Parameters
         ----------
@@ -219,16 +219,11 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         """
 
 
-        # `_validate_data` is defined in the `BaseEstimator` class.
-        # It allows to:
+        # `_validate_data` is a helper function to validate the input data. It does
         # - run different checks on the input data;
         # - define some attributes associated to the input data: `n_features_in_` and
         #   `feature_names_in_`.
-        check_X_y(X, y)
-        X, y = self._validate_data(X, y)
-        
-        #TODO: Why does new scikit 1.6 version of input validation not work?
-        #X,y = validation.validate_data(X, y)
+        X,y = validate_data(self, X, y, reset=True)
 
         self._validate_params()
         check_classification_targets(y)
@@ -305,7 +300,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
         # Input validation
         # We need to set reset=False because we don't want to overwrite `n_features_in_`
         # `feature_names_in_` but only check that the shape is consistent.
-        X = self._validate_data(X, reset=False)
+        X = validate_data(self, X, reset=False)
 
         #prediction = X.apply(self._apply_appropriate_model, axis='columns')
         prediction = np.apply_along_axis(self._apply_appropriate_model, 1, X).reshape(-1)
@@ -324,7 +319,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
             The predicted probabilities of the input samples belonging to each class.
         """
         check_is_fitted(self)
-        X = self._validate_data(X, reset=False)
+        X = validate_data(self, X, reset=False)
 
         apply_proba = lambda row: self._apply_appropriate_model(row, str_func='predict_proba')
         prediction = np.apply_along_axis(apply_proba, 1, X).reshape(-1, len(self.classes_))
@@ -344,7 +339,7 @@ class SeasonalClassifier(ClassifierMixin, BaseEstimator):
 
         """
         check_is_fitted(self)
-        X = self._validate_data(X, reset=False)
+        X = validate_data(self, X, reset=False)
 
         apply_log_proba = lambda row: self._apply_appropriate_model(row, str_func='predict_log_proba')
         prediction = np.apply_along_axis(apply_log_proba, 1, X).reshape(-1, len(self.classes_))

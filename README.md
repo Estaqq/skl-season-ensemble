@@ -1,18 +1,22 @@
-project-template - A template for scikit-learn contributions
+skl_seas_ens - A wrapper for skl-classifiers to handle 
+complex seasonal effects which cannot be handled by adding
+trend/seasonal features 
 ============================================================
 
-![tests](https://github.com/scikit-learn-contrib/project-template/actions/workflows/python-app.yml/badge.svg)
-[![codecov](https://codecov.io/gh/scikit-learn-contrib/project-template/graph/badge.svg?token=L0XPWwoPLw)](https://codecov.io/gh/scikit-learn-contrib/project-template)
-![doc](https://github.com/scikit-learn-contrib/project-template/actions/workflows/deploy-gh-pages.yml/badge.svg)
+**skl_seas_ens** is a classifier which manages a ensemble of base classifiers.
+We evaluating, we choose the base classifier which is responsible for the
+'season' which our data belongs to, which is determined based on a 'temporal' feature
+of our data. When training this classifier, we exclude data which is temporally to 
+far removed from the season it is responsible for.
 
-**project-template** is a template project for [scikit-learn](https://scikit-learn.org)
-compatible extensions.
+Thus, skl_seas_ens is best suited for cases, where we suspect our feautures to exhibit 
+complex interactions depending on the season, which cannot
+easily be modeled by adding trend/season features. Moreover, since
+we exclude temporally far removed data from training, it is best suited
+for use cases, where training data is plentiful. 
 
-It aids development of estimators that can be used in scikit-learn pipelines and
-(hyper)parameter search, while facilitating testing (including some API compliance),
-documentation, open source development, packaging, and continuous integration.
+It is a classifier compliant to the requirements for an
+skl classifier, see https://scikit-learn.org/stable/developers/develop.html.
+Thus is is compatible with methods such as sklearn.model_selection.GridSearchCV
+ and sklearn.model_selection.cross_validate.
 
-Refer to the documentation to modify the template for your own scikit-learn
-contribution: https://contrib.scikit-learn.org/project-template
-
-*Thank you for cleanly contributing to the scikit-learn ecosystem!*

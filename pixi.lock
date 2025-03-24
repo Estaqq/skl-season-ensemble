@@ -8500,8 +8500,8 @@ packages:
   timestamp: 1620240338595
 - pypi: .
   name: skl-seas-ens
-  version: 0.1.dev4+g68e6171.d20250318
-  sha256: 44aa2e555c623c07e12bf0be9a1f8a7420b90e2f6aac3d910c6d05c56db07353
+  version: 0.1.dev12+g5db3ea4.d20250318
+  sha256: d52948ab30c64ce32aaef4015094637b2a505994a03de6e46369ed77d09eb493
   requires_dist:
   - scikit-learn>=1.4.2
   - pandas

@@ -3,7 +3,7 @@
 
 import pytest
 
-from skl_seas_ens.utils.discovery import all_displays, all_estimators, all_functions
+from chronoclassify.utils.discovery import all_displays, all_estimators, all_functions
 
 
 def test_all_estimators():

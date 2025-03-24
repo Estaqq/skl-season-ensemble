@@ -1,6 +1,6 @@
 import pytest
 from sklearn.base import clone
-from skl_seas_ens import SeasonalClassifier
+from chronoclassify import SeasonalClassifier
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression

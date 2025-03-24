@@ -75,7 +75,7 @@ target/
 .LSOverride
 
 # auto-generated files
-skl_seas_ens/_version.py
+chronoclassify/_version.py
 test_main.py
 pixi.lock
 .vscode/settings.json

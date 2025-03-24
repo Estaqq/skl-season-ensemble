@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "skl_seas_ens"
+name = "chronoclassify"
 dynamic = ["version"]
 authors = [
   { name="Vighnesh Birodkar", email="vighneshbirodkar@nyu.edu" },
@@ -33,7 +33,7 @@ Homepage = "https://github.com/scikit-learn-contrib/project-template"
 Issues = "https://github.com/scikit-learn-contrib/project-template/issues"
 
 [tool.setuptools_scm]
-version_file = "skl_seas_ens/_version.py"
+version_file = "chronoclassify/_version.py"
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -44,7 +44,7 @@ python = ">=3.9"
 scikit-learn = ">=1.4.2"
 
 [tool.pixi.pypi-dependencies]
-skl_seas_ens = { path=".", editable=true }
+chronoclassify = { path=".", editable=true }
 
 [tool.pixi.feature.lint.dependencies]
 # The version below should be aligned with the one of `.pre-commit-config.yaml`
@@ -53,8 +53,8 @@ pre-commit = "3.7.1.*"
 ruff = "0.4.2*"
 
 [tool.pixi.feature.lint.tasks]
-black = { cmd = "black --check --diff skl_seas_ens && black --check --diff examples" }
-ruff = { cmd = "ruff check --output-format=full skl_seas_ens && ruff check --output-format=full examples" }
+black = { cmd = "black --check --diff chronoclassify && black --check --diff examples" }
+ruff = { cmd = "ruff check --output-format=full chronoclassify && ruff check --output-format=full examples" }
 lint = { depends-on = ["black", "ruff"]}
 
 [tool.pixi.feature.test.dependencies]
@@ -62,7 +62,7 @@ pytest = "*"
 pytest-cov = "*"
 
 [tool.pixi.feature.test.tasks]
-test = { cmd = "pytest -vsl --cov=skl_seas_ens --cov-report=xml skl_seas_ens" }
+test = { cmd = "pytest -vsl --cov=chronoclassify --cov-report=xml chronoclassify" }
 
 [tool.pixi.feature.doc.dependencies]
 matplotlib = "*"
@@ -95,7 +95,7 @@ exclude = '''
   | \.vscode
 )/
 '''
-force-exclude = "skl_seas_ens/_version.py"
+force-exclude = "chronoclassify/_version.py"
 
 [tool.ruff]
 # max line length for black
@@ -108,7 +108,7 @@ exclude=[
     "doc/_build",
     "doc/auto_examples",
     "build",
-    "skl_seas_ens/_version.py",
+    "chronoclassify/_version.py",
 ]
 
 [tool.ruff.lint]
